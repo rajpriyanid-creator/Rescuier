@@ -50,4 +50,3 @@ services:
         value: https://disastermesh-api.onrender.com/api/v1
       - key: VITE_SOCKET_URL
         value: https://disastermesh-api.onrender.com
-
