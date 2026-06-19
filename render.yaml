@@ -6,7 +6,7 @@ services:
     rootDir: disastermesh-backend
     region: singapore  # closest to India
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /health
     envVars:
@@ -38,8 +38,9 @@ services:
     rootDir: disastermesh-admin
     region: singapore
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     staticPublishPath: ./dist
+
     routes:
       - type: rewrite
         source: /*
