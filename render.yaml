@@ -1,0 +1,52 @@
+services:
+  # ── Backend API ─────────────────────────────────────────────────────────────
+  - type: web
+    name: disastermesh-api
+    runtime: node
+    rootDir: disastermesh-backend
+    region: singapore  # closest to India
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        sync: false
+      - key: NEO4J_URI
+        sync: false
+      - key: NEO4J_USERNAME
+        sync: false
+      - key: NEO4J_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://disastermesh-admin.onrender.com
+
+  # ── Admin Dashboard ──────────────────────────────────────────────────────────
+  - type: web
+    name: disastermesh-admin
+    runtime: static
+    rootDir: disastermesh-admin
+    region: singapore
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://disastermesh-api.onrender.com/api/v1
+      - key: VITE_SOCKET_URL
+        value: https://disastermesh-api.onrender.com
+
