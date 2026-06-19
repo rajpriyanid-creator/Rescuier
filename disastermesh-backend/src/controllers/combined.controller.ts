@@ -263,9 +263,39 @@ export const updateVolunteerStatus = async (req: AuthRequest, res: Response): Pr
 export const adminGetAllUsers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const city = req.userCity;
-    const users = await User.find({ city }).select('-refreshToken');
-    res.json({ users });
-  } catch { res.status(500).json({ error: 'Failed to get users' }); }
+    const users = await User.find({ city }).select('-refreshToken').lean();
+    
+    // Get active event to retrieve locations for
+    const event = await DisasterEvent.findOne({ city, status: 'active' });
+    
+    let locations: any[] = [];
+    if (event) {
+      locations = await UserLocation.find({
+        eventId: event._id,
+        isLastKnown: true
+      }).select('userId status timestamp latitude longitude').lean();
+    }
+    
+    const locationMap = new Map(locations.map((loc) => [loc.userId.toString(), loc]));
+    
+    const usersWithStatus = users.map((u) => {
+      const loc = locationMap.get(u._id.toString());
+      return {
+        ...u,
+        status: loc?.status || 'offline',
+        lastLocation: loc ? {
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          timestamp: loc.timestamp
+        } : null
+      };
+    });
+
+    res.json({ users: usersWithStatus });
+  } catch (err) {
+    console.error('[adminGetAllUsers]', err);
+    res.status(500).json({ error: 'Failed to get users' });
+  }
 };
 
 export const adminGetUserLocations = async (req: AuthRequest, res: Response): Promise<void> => {

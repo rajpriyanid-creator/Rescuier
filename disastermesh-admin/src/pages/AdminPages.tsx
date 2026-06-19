@@ -118,10 +118,10 @@ export function SOSPage() {
   );
 }
 
-// ── Users Page ────────────────────────────────────────────────────────────────
 export function UsersPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -135,28 +135,45 @@ export function UsersPage() {
     } catch {}
   };
 
-  const filtered = users.filter(
-    (u) => u.name?.toLowerCase().includes(search.toLowerCase()) ||
-           u.phone?.includes(search) ||
-           u.disasterId?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = users.filter((u) => {
+    const matchesSearch =
+      u.name?.toLowerCase().includes(search.toLowerCase()) ||
+      u.phone?.includes(search) ||
+      u.disasterId?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || (u.status || 'offline') === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="p-4 h-full overflow-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold text-white">Users ({users.length})</h1>
-        <input
-          type="text" placeholder="Search name, phone, ID…"
-          value={search} onChange={(e) => setSearch(e.target.value)}
-          className="bg-disaster-panel border border-disaster-border text-white text-sm rounded-lg px-3 py-1.5 w-56 placeholder-slate-500"
-        />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <h1 className="text-xl font-bold text-white">Users ({filtered.length} shown)</h1>
+        <div className="flex gap-2 items-center">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-disaster-panel border border-disaster-border text-white text-sm rounded-lg px-3 py-1.5 outline-none focus:border-red-500"
+          >
+            <option value="all">All Statuses</option>
+            <option value="safe">Safe</option>
+            <option value="need_help">Need Help</option>
+            <option value="evacuating">Evacuating</option>
+            <option value="shelter">In Shelter</option>
+            <option value="offline">Offline / Unknown</option>
+          </select>
+          <input
+            type="text" placeholder="Search name, phone, ID…"
+            value={search} onChange={(e) => setSearch(e.target.value)}
+            className="bg-disaster-panel border border-disaster-border text-white text-sm rounded-lg px-3 py-1.5 w-56 placeholder-slate-500"
+          />
+        </div>
       </div>
       {loading ? <div className="text-slate-400 text-center py-12">Loading…</div> : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-slate-500 border-b border-disaster-border">
-                {['Name','Phone','Disaster ID','Role','City','Actions'].map((h) => (
+                {['Name','Phone','Disaster ID','Status','Role','City','Last Seen','Actions'].map((h) => (
                   <th key={h} className="pb-2 pr-4 font-medium">{h}</th>
                 ))}
               </tr>
@@ -164,16 +181,33 @@ export function UsersPage() {
             <tbody className="divide-y divide-disaster-border/50">
               {filtered.map((u) => (
                 <tr key={u._id} className="hover:bg-slate-800/50">
-                  <td className="py-2 pr-4 text-white">{u.name}</td>
+                  <td className="py-2 pr-4 text-white font-medium">{u.name}</td>
                   <td className="py-2 pr-4 text-slate-400">{u.phone}</td>
                   <td className="py-2 pr-4 text-slate-400 font-mono text-xs">{u.disasterId}</td>
+                  <td className="py-2 pr-4">
+                    <span className={`text-xs px-1.5 py-0.5 rounded font-bold capitalize border ${
+                      u.status === 'safe' ? 'bg-green-950/40 text-green-450 border-green-800' :
+                      u.status === 'need_help' ? 'bg-red-950/45 text-red-400 border-red-800 animate-pulse' :
+                      u.status === 'evacuating' ? 'bg-orange-950/40 text-orange-455 border-orange-850' :
+                      u.status === 'shelter' ? 'bg-blue-955/40 text-blue-400 border-blue-800' :
+                      u.status === 'checkin' ? 'bg-purple-955/40 text-purple-400 border-purple-800' :
+                      'bg-slate-800 text-slate-500 border-slate-700'
+                    }`}>
+                      {u.status || 'offline'}
+                    </span>
+                  </td>
                   <td className="py-2 pr-4">
                     <span className={`text-xs px-1.5 py-0.5 rounded ${
                       u.role === 'admin' || u.role === 'superadmin' ? 'badge-critical' :
                       u.role === 'responder' ? 'badge-urgent' : 'badge-standard'
                     }`}>{u.role}</span>
                   </td>
-                  <td className="py-2 pr-4 text-slate-400">{u.city}</td>
+                  <td className="py-2 pr-4 text-slate-450">{u.city}</td>
+                  <td className="py-2 pr-4 text-slate-400 text-xs">
+                    {u.lastLocation?.timestamp
+                      ? new Date(u.lastLocation.timestamp).toLocaleString()
+                      : 'Never'}
+                  </td>
                   <td className="py-2">
                     <select
                       value={u.role}

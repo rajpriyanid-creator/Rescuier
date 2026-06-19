@@ -66,18 +66,46 @@ export const useLocationTracking = (enabled: boolean) => {
     async (status: string) => {
       useAppStore.getState().setLocationStatus(status);
       if (user && activeEvent && isOnline) {
-        const { lastLatitude, lastLongitude } = useAppStore.getState();
-        if (lastLatitude && lastLongitude) {
+        let lat = useAppStore.getState().lastLatitude;
+        let lng = useAppStore.getState().lastLongitude;
+
+        if (!lat || !lng) {
+          try {
+            const { status: permStatus } = await Location.requestForegroundPermissionsAsync();
+            if (permStatus === 'granted') {
+              const loc = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.Balanced,
+              });
+              lat = loc.coords.latitude;
+              lng = loc.coords.longitude;
+              setLocation(lat, lng);
+            }
+          } catch (err) {
+            console.warn('[Location] Failed to get current location for manual update:', err);
+          }
+        }
+
+        if (lat && lng) {
           await api.post('/location/update', {
             eventId: activeEvent._id,
-            latitude: lastLatitude,
-            longitude: lastLongitude,
+            latitude: lat,
+            longitude: lng,
             status,
+          });
+
+          // Socket update for real-time map
+          await emitLocationUpdate({
+            userId: user._id,
+            latitude: lat,
+            longitude: lng,
+            status,
+            eventId: activeEvent._id,
+            cityId: user.city,
           });
         }
       }
     },
-    [user, activeEvent, isOnline]
+    [user, activeEvent, setLocation, isOnline]
   );
 
   return { updateStatusManually, sendLocation };

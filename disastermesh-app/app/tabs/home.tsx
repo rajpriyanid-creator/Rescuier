@@ -23,12 +23,12 @@ const STATUS_OPTIONS = [
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { user, activeEvent, setActiveEvent, seismicAlert, clearSeismicAlert } = useAppStore();
+  const { user, activeEvent, setActiveEvent, seismicAlert, clearSeismicAlert, locationStatus } = useAppStore();
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState('safe');
   const [evacuationRoute, setEvacuationRoute] = useState<any>(null);
   const [fetchingRoute, setFetchingRoute] = useState(false);
   const pulseAnim = new Animated.Value(1);
+
 
   // Enable seismic detection and location tracking when there's an active event
   useSeismicDetection(!!activeEvent);
@@ -131,7 +131,6 @@ export default function HomeScreen() {
   };
 
   const handleStatusChange = async (statusId: string) => {
-    setSelectedStatus(statusId);
     await updateStatusManually(statusId);
   };
 
@@ -231,7 +230,7 @@ export default function HomeScreen() {
               {STATUS_OPTIONS.map((s) => (
                 <TouchableOpacity
                   key={s.id}
-                  style={[styles.statusBtn, selectedStatus === s.id && { borderColor: s.color, borderWidth: 2 }]}
+                  style={[styles.statusBtn, locationStatus === s.id && { borderColor: s.color, borderWidth: 2 }]}
                   onPress={() => handleStatusChange(s.id)}
                 >
                   <Ionicons name={s.icon as any} size={22} color={s.color} />
