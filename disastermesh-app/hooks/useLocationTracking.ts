@@ -16,9 +16,12 @@ export const useLocationTracking = (enabled: boolean) => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') return;
 
-      const loc = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
+      let loc = await Location.getLastKnownPositionAsync({});
+      if (!loc) {
+        loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+      }
 
       const { latitude, longitude } = loc.coords;
       setLocation(latitude, longitude);
@@ -73,9 +76,12 @@ export const useLocationTracking = (enabled: boolean) => {
           try {
             const { status: permStatus } = await Location.requestForegroundPermissionsAsync();
             if (permStatus === 'granted') {
-              const loc = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.Balanced,
-              });
+              let loc = await Location.getLastKnownPositionAsync({});
+              if (!loc) {
+                loc = await Location.getCurrentPositionAsync({
+                  accuracy: Location.Accuracy.Balanced,
+                });
+              }
               lat = loc.coords.latitude;
               lng = loc.coords.longitude;
               setLocation(lat, lng);

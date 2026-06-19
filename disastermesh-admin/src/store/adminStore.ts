@@ -98,7 +98,13 @@ export const useAdminStore = create<AdminStore>((set) => ({
   locationPins: {},
   upsertPin: (pin) =>
     set((s) => ({
-      locationPins: { ...s.locationPins, [pin.userId]: pin },
+      locationPins: {
+        ...s.locationPins,
+        [pin.userId]: {
+          ...(s.locationPins[pin.userId] || {}),
+          ...pin,
+        },
+      },
     })),
 
   analytics: null,

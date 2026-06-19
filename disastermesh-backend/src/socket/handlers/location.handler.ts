@@ -1,5 +1,6 @@
 import { Server, Socket } from 'socket.io';
 import { UserLocation } from '../../models/index';
+import { User } from '../../models/User.model';
 
 export const registerLocationHandlers = (io: Server, socket: Socket): void => {
   // Persist location update to DB and broadcast to admin
@@ -28,6 +29,8 @@ export const registerLocationHandlers = (io: Server, socket: Socket): void => {
         { upsert: true }
       );
 
+      const user = await User.findById(data.userId).select('name disasterId');
+
       // Broadcast to admin room
       io.to(`admin:${data.cityId}`).emit('location:update', {
         userId: data.userId,
@@ -36,6 +39,8 @@ export const registerLocationHandlers = (io: Server, socket: Socket): void => {
         status: data.status,
         accuracy: data.accuracy,
         timestamp: Date.now(),
+        name: user?.name,
+        disasterId: user?.disasterId,
       });
     } catch (err) {
       console.error('[Socket/location] Error saving location:', err);

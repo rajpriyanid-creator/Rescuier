@@ -35,9 +35,12 @@ export default function HomeScreen() {
   const { updateStatusManually, sendLocation } = useLocationTracking(!!activeEvent);
 
   useEffect(() => {
+    if (user?.city) {
+      joinCityRoom(user.city);
+    }
     loadEvent();
     setupSocket();
-  }, []);
+  }, [user?.city]);
 
   // Pulse animation for active event
   useEffect(() => {
@@ -63,13 +66,20 @@ export default function HomeScreen() {
 
   const loadEvent = async () => {
     try {
+      if (user?.city) {
+        await joinCityRoom(user.city);
+      }
       const res = await api.get('/events/active');
       if (res.data.event) {
         setActiveEvent(res.data.event);
         await joinCityRoom(res.data.event.city);
         await joinDisasterRoom(res.data.event._id);
+      } else {
+        setActiveEvent(null);
       }
-    } catch {}
+    } catch {
+      setActiveEvent(null);
+    }
   };
 
   const setupSocket = async () => {

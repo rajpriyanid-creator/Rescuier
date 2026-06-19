@@ -156,7 +156,13 @@ export const updateLocation = async (req: AuthRequest, res: Response): Promise<v
 
     // Emit to admin map
     emitToAdmin(req.userCity!, 'location:update', {
-      userId: req.userId, latitude, longitude, status, timestamp: loc.timestamp,
+      userId: req.userId,
+      latitude,
+      longitude,
+      status: status || 'safe',
+      timestamp: loc.timestamp,
+      name: user?.name,
+      disasterId: user?.disasterId,
     });
 
     res.json({ location: loc });

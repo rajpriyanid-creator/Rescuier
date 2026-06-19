@@ -303,12 +303,15 @@ export const adminGetUserLocations = async (req: AuthRequest, res: Response): Pr
     const city = req.userCity;
     const event = await DisasterEvent.findOne({ city, status: 'active' });
     if (!event) { res.json({ locations: [] }); return; }
-    const cutoff = new Date(Date.now() - 5 * 60 * 1000); // last 5 min
     const locations = await UserLocation.find({
-      eventId: event._id, timestamp: { $gte: cutoff }
+      eventId: event._id,
+      isLastKnown: true
     }).populate('userId', 'name disasterId role medicalProfile');
     res.json({ locations });
-  } catch { res.status(500).json({ error: 'Failed to get user locations' }); }
+  } catch (err) {
+    console.error('[adminGetUserLocations]', err);
+    res.status(500).json({ error: 'Failed to get user locations' });
+  }
 };
 
 export const adminAssignRole = async (req: AuthRequest, res: Response): Promise<void> => {
