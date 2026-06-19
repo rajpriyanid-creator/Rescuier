@@ -4,6 +4,7 @@ services:
     name: disastermesh-api
     runtime: node
     rootDir: disastermesh-backend
+    plan: free
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /health
