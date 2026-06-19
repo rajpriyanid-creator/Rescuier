@@ -5,7 +5,7 @@ services:
     runtime: node
     rootDir: disastermesh-backend
     plan: free
-    buildCommand: npm install --include=dev && npm run build
+    buildCommand: npm install --include=dev --legacy-peer-deps && npm run build
     startCommand: npm start
     healthCheckPath: /health
     envVars:
@@ -37,7 +37,7 @@ services:
     name: disastermesh-admin
     runtime: static
     rootDir: disastermesh-admin
-    buildCommand: npm install --include=dev && npm run build
+    buildCommand: npm install --include=dev --legacy-peer-deps && npm run build
     staticPublishPath: ./dist
     routes:
       - type: rewrite
@@ -50,3 +50,4 @@ services:
         value: https://disastermesh-api.onrender.com/api/v1
       - key: VITE_SOCKET_URL
         value: https://disastermesh-api.onrender.com
+
