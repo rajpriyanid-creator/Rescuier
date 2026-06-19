@@ -15,6 +15,8 @@ services:
         value: 5000
       - key: NODE_VERSION
         value: 20
+      - key: NPM_CONFIG_LEGACY_PEER_DEPS
+        value: true
       - key: MONGODB_URI
         sync: false
       - key: NEO4J_URI
@@ -46,8 +48,11 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 20
+      - key: NPM_CONFIG_LEGACY_PEER_DEPS
+        value: true
       - key: VITE_API_URL
         value: https://disastermesh-api.onrender.com/api/v1
       - key: VITE_SOCKET_URL
         value: https://disastermesh-api.onrender.com
+
 
