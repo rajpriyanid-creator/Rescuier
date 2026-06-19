@@ -35,9 +35,9 @@ services:
     name: disastermesh-admin
     runtime: static
     rootDir: disastermesh-admin
-    plan: free
     buildCommand: npm install --include=dev && npm run build
     staticPublishPath: ./dist
+
 
 
     routes:
