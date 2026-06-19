@@ -13,6 +13,8 @@ services:
         value: production
       - key: PORT
         value: 5000
+      - key: NODE_VERSION
+        value: 20
       - key: MONGODB_URI
         sync: false
       - key: NEO4J_URI
@@ -37,14 +39,13 @@ services:
     rootDir: disastermesh-admin
     buildCommand: npm install --include=dev && npm run build
     staticPublishPath: ./dist
-
-
-
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
     envVars:
+      - key: NODE_VERSION
+        value: 20
       - key: VITE_API_URL
         value: https://disastermesh-api.onrender.com/api/v1
       - key: VITE_SOCKET_URL
