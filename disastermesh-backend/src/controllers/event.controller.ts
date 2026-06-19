@@ -100,15 +100,17 @@ export const declareDisaster = async (req: AuthRequest, res: Response): Promise<
         centerLat, centerLng, hazardRadius
       );
 
-      // 2b. Seed provided safe zones into Neo4j graph
+      // 2b. Seed provided safe zones into Neo4j graph in parallel
       if (safeZones && safeZones.length > 0) {
-        for (const sz of safeZones) {
-          const zoneId = `${eventIdStr}-${sz.latitude}-${sz.longitude}`;
-          await upsertSafeZoneNode(
-            zoneId, sz.name, sz.latitude, sz.longitude,
-            sz.capacity ?? 500, eventIdStr, city
-          );
-        }
+        await Promise.all(
+          safeZones.map((sz) => {
+            const zoneId = `${eventIdStr}-${sz.latitude}-${sz.longitude}`;
+            return upsertSafeZoneNode(
+              zoneId, sz.name, sz.latitude, sz.longitude,
+              sz.capacity ?? 500, eventIdStr, city
+            );
+          })
+        );
       }
     } catch (neo4jErr) {
       console.warn('[declareDisaster] Neo4j seeding failed (non-fatal):', neo4jErr);
