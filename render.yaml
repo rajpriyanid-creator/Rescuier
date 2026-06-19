@@ -35,10 +35,10 @@ services:
     name: disastermesh-admin
     runtime: static
     rootDir: disastermesh-admin
-    region: singapore
     plan: free
     buildCommand: npm install --include=dev && npm run build
     staticPublishPath: ./dist
+
 
     routes:
       - type: rewrite
