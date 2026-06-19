@@ -4,7 +4,6 @@ services:
     name: disastermesh-api
     runtime: node
     rootDir: disastermesh-backend
-    region: singapore  # closest to India
     plan: free
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
